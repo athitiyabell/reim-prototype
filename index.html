@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>สถานะการเบิกจ่าย (สำรองจ่าย)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- DARK (default) ---------- */
+    body{
+      --page-bg:#010a18;
+      --page-grad:linear-gradient(180deg,#010a18 0%,#08203f 16%,#123a63 32%,#2a5b90 52%,#4d81b2 70%,#7ba7cf 86%,#9dc0dd 100%);
+      --page-glow:radial-gradient(880px 420px at 12% 0%,rgba(0,142,233,.30),transparent 64%);
+      --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.09'/%3E%3C/svg%3E");
+
+      --band-ink:#f4f9ff;
+      --band-sub:#b7cee6;
+      --band-surface:rgba(199,222,248,.10);
+      --band-line:rgba(190,222,248,.28);
+
+      --surface:rgba(9,26,48,.88);
+      --surface-solid:#0d1e39;
+      --raise:rgba(160,200,235,.07);
+      --line:rgba(160,200,235,.20);
+      --line-soft:rgba(160,200,235,.13);
+      --ink:#eaf2fb;
+      --muted:#aec4de;
+      --faint:#9db3cf;
+      --th-bg:rgba(160,200,235,.08);
+      --th-fg:#a7c8e6;
+      --accent:#3aabf2;
+      --accent-deep:#8ed0fb;
+      --accent-soft:rgba(0,142,233,.18);
+      --row-hover:rgba(0,142,233,.12);
+      --input-bg:rgba(2,13,33,.55);
+      --input-line:rgba(160,200,235,.28);
+      --btn-bg:rgba(199,222,248,.08);
+      --sheet-bg:#0e1e39;
+      --sk1:rgba(160,200,235,.09);
+      --sk2:rgba(160,200,235,.18);
+      --sb-thumb:rgba(160,200,235,.28);
+      --sel-bg:#1f5f92;
+
+      --ok-bg:rgba(70,196,132,.20);--ok-fg:#7fe3a9;
+      --wt-bg:rgba(245,200,107,.20);--wt-fg:#f7cf78;
+      --cx-bg:rgba(160,180,205,.18);--cx-fg:#c2cede;
+      --answer-fg:#f7cf78;
+      --done-fg:#7fe3a9;
+      --err-fg:#ff9d95;
+      --err-bg:rgba(255,120,110,.12);
+      --err-line:rgba(255,120,110,.34);
+    }
+    /* ---------- LIGHT ---------- */
+    body.light{
+      --page-bg:#ffffff;
+      --page-grad:linear-gradient(180deg,#ffffff 0%,#f7fafd 30%,#eef4fa 60%,#e2ecf6 100%);
+      --page-glow:radial-gradient(880px 420px at 12% 0%,rgba(0,142,233,.10),transparent 64%);
+      --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g2)' opacity='0.05'/%3E%3C/svg%3E");
+
+      --band-ink:#0f1b2d;
+      --band-sub:#586a80;
+      --band-surface:#ffffff;
+      --band-line:#dbe4f0;
+
+      --surface:rgba(255,255,255,.92);
+      --surface-solid:#ffffff;
+      --raise:#f4f8fc;
+      --line:#e0e7f1;
+      --line-soft:#eaeff7;
+      --ink:#0f1b2d;
+      --muted:#586a80;
+      --faint:#66758b;
+      --th-bg:#f1f5fa;
+      --th-fg:#4c5b71;
+      --accent:#008ee9;
+      --accent-deep:#0069b3;
+      --accent-soft:rgba(0,142,233,.12);
+      --row-hover:#eef6fe;
+      --input-bg:#ffffff;
+      --input-line:#cfd8e6;
+      --btn-bg:#ffffff;
+      --sheet-bg:#ffffff;
+      --sk1:#eef2f7;
+      --sk2:#dfe7f0;
+      --sb-thumb:#c3cfdd;
+      --sel-bg:#bfe0fb;
+
+      --ok-bg:#d4edbc;--ok-fg:#11734b;
+      --wt-bg:#fdeeba;--wt-fg:#7a5b00;
+      --cx-bg:#e6eaf0;--cx-fg:#5b6b80;
+      --answer-fg:#8a5a00;
+      --done-fg:#11734b;
+      --err-fg:#b42318;
+      --err-bg:#fef1f0;
+      --err-line:#f4c4bf;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    .hide{display:none!important}
+    html{background-color:#010a18;overflow-y:scroll;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--sb-thumb) transparent}
+    body{
+      font-family:"Outfit","Noto Sans Thai",-apple-system,Arial,sans-serif;
+      color:var(--ink);
+      min-height:100vh;display:flex;flex-direction:column;
+      background-color:var(--page-bg);
+      background-image:var(--grain),var(--page-glow),var(--page-grad);
+      background-repeat:repeat,no-repeat,no-repeat;
+      background-size:140px 140px,100% 620px,100% 100%;
+      background-position:top left,top left,top left;
+      transition:color .2s;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* browser surfaces */
+    ::selection{background:var(--sel-bg);color:var(--ink)}
+    ::-webkit-scrollbar{width:11px;height:11px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--sb-thumb);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent);background-clip:content-box}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+    .ic{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+    /* ---------- header ---------- */
+    .band{position:relative;padding:20px 20px 16px}
+    .bandinner{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:14px;min-height:40px}
+    h1{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.3;color:var(--band-ink);min-width:0}
+    .spacer{flex:1}
+    .ghost{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;background:var(--band-surface);border:1px solid var(--band-line);font-family:inherit;font-size:13px;font-weight:600;color:var(--band-ink);cursor:pointer;padding:8px 13px;border-radius:10px;line-height:1;transition:background .15s,border-color .15s}
+    .ghost:hover{border-color:var(--accent);background:var(--accent-soft)}
+    .ghost .ic{font-size:16px}
+    .iconbtn{padding:9px;border-radius:10px}
+    .iconbtn .ic{font-size:17px}
+
+    /* ---------- layout ---------- */
+    .wrap{flex:1;width:100%;max-width:1060px;margin:0 auto;padding:6px 20px 80px}
+    .wrap.center{display:flex;flex-direction:column;justify-content:center;padding-bottom:120px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
+
+    /* ---------- search ---------- */
+    .searchcard{padding:20px;max-width:520px;width:100%;margin:0 auto}
+    .searchlede{font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+    label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px}
+    .searchbox{position:relative}
+    input[type=text]{width:100%;padding:13px 14px;font-size:16px;font-family:inherit;color:var(--ink);background:var(--input-bg);border:1px solid var(--input-line);border-radius:10px;outline:none;caret-color:var(--accent);transition:border-color .15s,box-shadow .15s}
+    input[type=text]::placeholder{color:var(--faint)}
+    input[type=text]:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
+    input[type=text]:disabled{opacity:.72;cursor:progress}
+    .loadbar{position:absolute;left:1px;right:1px;bottom:1px;height:2px;border-radius:0 0 10px 10px;overflow:hidden;background:var(--line-soft)}
+    .loadbar i{display:block;width:34%;height:100%;background:var(--accent);animation:slide 1.25s ease-in-out infinite}
+    @keyframes slide{0%{transform:translateX(-110%)}100%{transform:translateX(330%)}}
+    .suggest{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:6px;background:var(--sheet-bg);border:1px solid var(--line);border-radius:10px;max-height:290px;overflow:auto;box-shadow:0 14px 34px rgba(1,10,24,.4);list-style:none}
+    .suggest li{padding:11px 14px;cursor:pointer;font-size:15px;color:var(--ink)}
+    .suggest li:hover,.suggest li[aria-selected=true]{background:var(--row-hover);color:var(--accent-deep)}
+    .nohit{margin-top:12px;font-size:13.5px;color:var(--muted);line-height:1.6}
+    .msg{margin-top:12px;color:var(--muted);font-size:14px}
+    .msg:empty{display:none;margin:0}
+
+    /* ---------- error ---------- */
+    .errbox{margin:14px 0 0;padding:14px 16px;border:1px solid var(--err-line);background:var(--err-bg);border-radius:12px;color:var(--err-fg);font-size:14px;line-height:1.6}
+    .errbox button{margin-top:10px;font-family:inherit;font-size:13px;font-weight:600;color:var(--err-fg);background:transparent;border:1px solid var(--err-line);border-radius:999px;padding:7px 15px;cursor:pointer}
+    .errbox button:hover{background:var(--err-line)}
+
+    /* ---------- answer ---------- */
+    .who{font-size:15px;font-weight:600;color:var(--band-sub);margin:14px 0 4px}
+    .answer{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 10px;font-size:19px;font-weight:500;color:var(--band-ink);letter-spacing:-.01em;line-height:1.25}
+    .answer b{font-size:clamp(34px,7.4vw,50px);font-weight:700;letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--answer-fg)}
+    .answer.done{color:var(--done-fg);font-size:clamp(24px,5vw,32px);font-weight:700;letter-spacing:-.025em}
+    .ameta{margin-top:8px;font-size:14px;color:var(--band-sub);line-height:1.6}
+    .ameta .sep{opacity:.5;padding:0 3px}
+    .jump{font:inherit;color:var(--band-ink);background:transparent;border:0;border-bottom:1px solid var(--band-line);padding:0 0 1px;cursor:pointer;font-weight:600}
+    .jump:hover{border-bottom-color:var(--accent);color:var(--accent-deep)}
+
+    /* ---------- ledger head ---------- */
+    .ledgercard{margin-top:20px;overflow:hidden}
+    .lhead1{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line-soft)}
+    .seg{display:inline-flex;gap:4px;padding:4px;background:var(--th-bg);border:1px solid var(--line);border-radius:999px}
+    .segbtn{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);padding:8px 15px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
+    .segbtn:hover{color:var(--ink)}
+    .segbtn[aria-selected=true]{background:var(--surface-solid);color:var(--accent-deep);box-shadow:0 1px 3px rgba(1,10,24,.25)}
+    .cnt{background:var(--th-bg);border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700;line-height:1.6;font-variant-numeric:tabular-nums}
+    .segbtn[aria-selected=true] .cnt{background:var(--accent-soft);color:var(--accent-deep)}
+
+    .refreshbox{display:flex;align-items:center;gap:11px}
+    .refresh{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:600;color:var(--accent-deep);background:var(--btn-bg);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+    .refresh:hover{border-color:var(--accent)}
+    .refresh[disabled]{opacity:.6;cursor:progress}
+    .refresh .ic{font-size:14px}
+    .refresh.busy .ic{animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .stamp{font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+
+    .lhead2{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line-soft)}
+    .chip{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+    .chip:hover{color:var(--ink);border-color:var(--input-line)}
+    .chip b{font-weight:700;font-variant-numeric:tabular-nums;opacity:.75}
+    .chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep)}
+    .chip[aria-pressed=true] b{opacity:1}
+    .note{padding:12px 16px;font-size:13px;color:var(--muted);line-height:1.6;border-bottom:1px solid var(--line-soft);background:var(--raise)}
+
+    /* ---------- ledger list ---------- */
+    .ledgercard{--c-date:88px;--c-amt:96px;--c-paid:96px;--c-st:100px;--c-chev:26px;--cols:var(--c-date) minmax(0,1fr) var(--c-amt) var(--c-paid) var(--c-st) var(--c-chev);--cols3:var(--c-date) minmax(0,1fr) var(--c-amt) var(--c-chev)}
+    .colhead{display:grid;grid-template-columns:var(--cols);gap:0 16px;padding:9px 16px;background:var(--th-bg);border-bottom:1px solid var(--line-soft);font-size:12px;font-weight:600;color:var(--th-fg);white-space:nowrap}
+    .colhead.p3{grid-template-columns:var(--cols3)}
+    .colhead .r{text-align:right}
+    .colhead .c{text-align:center}
+    .ledger{list-style:none}
+    .grp{position:sticky;top:0;z-index:5;padding:9px 16px;background:var(--surface-solid);border-bottom:1px solid var(--line-soft);font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--muted)}
+    .ent{border-bottom:1px solid var(--line-soft)}
+    .ent:last-child{border-bottom:0}
+    .esum{display:grid;width:100%;text-align:left;grid-template-columns:var(--cols);gap:0 16px;align-items:center;padding:13px 16px;background:transparent;border:0;font-family:inherit;font-size:14px;color:var(--ink);cursor:pointer;transition:background .15s}
+    .esum.p3{grid-template-columns:var(--cols3)}
+    .esum:hover{background:var(--row-hover)}
+    .esum:focus-visible{outline-offset:-2px}
+    .e-date{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+    .e-det{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .e-amt{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+    .e-paid{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+    .e-st{text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
+    .wait{font-size:11px;color:var(--faint);white-space:nowrap;font-variant-numeric:tabular-nums}
+    .chev{font-size:17px;color:var(--faint);justify-self:end;transition:transform .22s cubic-bezier(.22,1,.36,1)}
+    .ent.open .chev{transform:rotate(180deg)}
+    .dash{color:var(--faint)}
+
+    .pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;line-height:1.35}
+    .pill.ok{background:var(--ok-bg);color:var(--ok-fg)}
+    .pill.wt{background:var(--wt-bg);color:var(--wt-fg)}
+    .pill.cx{background:var(--cx-bg);color:var(--cx-fg)}
+
+    /* ---------- inline detail ---------- */
+    .det{display:grid;grid-template-rows:0fr;transition:grid-template-rows .24s cubic-bezier(.22,1,.36,1);background:var(--raise)}
+    .det>.detin{overflow:hidden;visibility:hidden;transition:visibility 0s linear .24s}
+    .ent.open .det{grid-template-rows:1fr}
+    .ent.open .det>.detin{visibility:visible;transition-delay:0s}
+    .detpad{padding:4px 16px 16px}
+    .drow{display:flex;gap:16px;padding:10px 0;border-top:1px solid var(--line-soft)}
+    .drow:first-child{border-top:0}
+    .drow.narrow{display:none}
+    .dkey{flex:0 0 150px;font-size:12.5px;color:var(--muted);padding-top:2px}
+    .dval{flex:1;font-size:14px;line-height:1.65;word-break:break-word;white-space:pre-wrap}
+    .filelink{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;margin:0 8px 6px 0;border-radius:9px;background:var(--btn-bg);border:1px solid var(--line);color:var(--accent-deep);font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;text-decoration:none;transition:background .15s,border-color .15s,transform .1s}
+    .filelink:hover{border-color:var(--accent);background:var(--accent-soft)}
+    .filelink:active{transform:translateY(1px)}
+    .filelink .ic{font-size:14px}
+
+    /* ---------- empty + skeleton ---------- */
+    .empty{padding:34px 16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.7}
+    .empty strong{display:block;color:var(--ink);font-size:15px;font-weight:600;margin-bottom:5px}
+    .empty button{margin-top:12px;font-family:inherit;font-size:13px;font-weight:600;color:var(--accent-deep);background:var(--btn-bg);border:1px solid var(--line);border-radius:999px;padding:7px 15px;cursor:pointer}
+    .empty button:hover{border-color:var(--accent)}
+    .sk{border-radius:6px;background:linear-gradient(90deg,var(--sk1) 25%,var(--sk2) 50%,var(--sk1) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite;height:13px}
+    @keyframes shim{to{background-position:-200% 0}}
+    .skrow{display:grid;grid-template-columns:88px minmax(0,1fr) 80px;gap:0 16px;align-items:center;padding:16px;border-bottom:1px solid var(--line-soft)}
+
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    }
+
+    @media(max-width:760px){
+      .band{padding:16px 14px 12px}
+      .bandinner{gap:10px}
+      h1{font-size:16px}
+      #back .btx{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      #back{padding:9px;border-radius:10px}
+      #back .ic{font-size:17px}
+      .wrap{padding:6px 14px 72px}
+      .searchcard{padding:17px}
+      .lhead1{padding:12px 13px}
+      .lhead2{padding:11px 13px}
+      .note{padding:11px 13px}
+      .seg{display:flex;width:100%}
+      .segbtn{flex:1;justify-content:center;padding:9px 8px}
+      .refreshbox{width:100%;justify-content:space-between}
+      .colhead{display:none}
+      .grp{padding:8px 13px}
+      .esum{
+        grid-template-columns:minmax(0,1fr) auto;
+        grid-template-areas:"det chev" "amt st" "date date";
+        gap:5px 12px;padding:14px 13px;align-items:center;
+      }
+      .esum.p3{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"det chev" "amt amt" "date date"}
+      .e-det{grid-area:det;white-space:normal;overflow:visible;text-overflow:clip;font-weight:600;line-height:1.45}
+      .e-amt{grid-area:amt;text-align:left;font-size:17px}
+      .e-st{grid-area:st;align-items:flex-end}
+      .e-date{grid-area:date;font-size:12px}
+      .e-paid{display:none}
+      .chev{grid-area:chev;align-self:start}
+      .wait{display:none}
+      .e-date .wafter{display:inline}
+      .detpad{padding:2px 13px 15px}
+      .drow.narrow{display:flex}
+      .drow{flex-direction:column;gap:3px}
+      .dkey{flex:none}
+      .skrow{grid-template-columns:minmax(0,1fr) 70px}
+    }
+    @media(min-width:761px){.e-date .wafter{display:none}}
+    .proto{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;padding:8px 16px;font-size:12.5px;line-height:1.5;color:var(--band-ink);background:var(--band-surface);border-bottom:1px solid var(--band-line);text-align:center}
+    .proto b{font-weight:700;letter-spacing:.02em}
+  </style>
+
+<svg class="sprite" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 11a8.5 8.5 0 0 0-14.6-5.4L3 8.5"/><path d="M3 4v5h5"/><path d="M3.5 13a8.5 8.5 0 0 0 14.6 5.4L21 15.5"/><path d="M21 20v-5h-5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.5 8.5 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"/></symbol>
+</defs></svg>
+
+</head>
+<body>
+<div class="proto" role="note"><b>Prototype</b><span>ข้อมูลในหน้านี้เป็นข้อมูลตัวอย่าง ไม่ใช่ยอดจริง · ลองค้นหา &ldquo;Bell&rdquo;</span></div>
+
+<header class="band">
+  <div class="bandinner">
+    <button type="button" class="ghost hide" id="back"><svg class="ic"><use href="#i-back"/></svg><span class="btx">ค้นหาชื่ออื่น</span></button>
+    <h1>สถานะการเบิกจ่าย (สำรองจ่าย)</h1>
+    <span class="spacer"></span>
+    <button type="button" class="ghost iconbtn" id="themeBtn" aria-pressed="false">
+      <svg class="ic" id="tico"><use href="#i-moon"/></svg><span class="sr" id="tlabel">สลับเป็นโหมดสว่าง</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap center" id="wrap">
+
+  <div class="card searchcard" id="searchcard">
+    <p class="searchlede">ค้นหาชื่อของคุณ เพื่อดูรายการที่สำรองจ่ายไปและสถานะการคืนเงินจากบริษัท</p>
+    <label for="q">ค้นหารายชื่อ</label>
+    <div class="searchbox">
+      <input id="q" type="text" autocomplete="off" role="combobox" aria-expanded="false"
+             aria-controls="sg" aria-autocomplete="list" aria-describedby="msg"
+             placeholder="กำลังโหลดรายชื่อ..." disabled>
+      <div class="loadbar" id="loadbar"><i></i></div>
+      <ul id="sg" class="suggest hide" role="listbox" aria-label="รายชื่อพนักงาน"></ul>
+    </div>
+    <div class="msg" id="msg">กำลังโหลดรายชื่อพนักงาน...</div>
+    <div class="nohit hide" id="nohit"></div>
+  </div>
+
+  <div id="err" role="alert"></div>
+
+  <div class="hide" id="result">
+    <p class="who" id="who"></p>
+    <div id="answer"></div>
+    <div class="card ledgercard" id="ledger"></div>
+  </div>
+
+  <p class="sr" id="live" role="status" aria-live="polite"></p>
+</main>
+
+<script>
+/* Prototype only: stands in for google.script.run with sample data for one person. */
+window.__FIX={"names": ["Bell - Athitiya Tanpaisalcharoen"], "data": {"name": "Bell - Athitiya Tanpaisalcharoen", "company": {"rows": [{"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "25 Oct 2026", "submittedRaw": 1792899000000, "detail": "ค่าแท็กซี่ไปพบลูกค้าที่อาคารสาทรสแควร์", "amount": "1,250.00", "amountNum": 1250.0, "receipts": [], "docs": ["https://drive.google.com/", "https://drive.google.com/"], "note": "ส่งใบเสร็จตัวจริงให้ฝ่ายบัญชีแล้ว", "paidDate": "", "noClaim": false, "status": "รอดำเนินการ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "18 Oct 2026", "submittedRaw": 1792294200000, "detail": "ค่าอาหารกลางวันทีมประชุม sprint planning ประจำเดือน", "amount": "4,820.50", "amountNum": 4820.5, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "", "noClaim": false, "status": "รอดำเนินการ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "06 Oct 2026", "submittedRaw": 1791257400000, "detail": "ค่าอุปกรณ์สำนักงาน - เมาส์ไร้สายสำหรับใช้งานที่บ้าน", "amount": "890.00", "amountNum": 890.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "", "noClaim": false, "status": "รอดำเนินการ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "12 Sep 2026", "submittedRaw": 1789183800000, "detail": "ค่าเดินทางไปงานสัมมนา รวมค่ารถและค่าที่จอดรถ", "amount": "15,600.00", "amountNum": 15600.0, "receipts": [], "docs": [], "note": "", "paidDate": "", "noClaim": false, "status": "รอดำเนินการ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "01 Sep 2026", "submittedRaw": 1788233400000, "detail": "ค่าต่ออายุโดเมนเนม 1 ปี", "amount": "2,340.00", "amountNum": 2340.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "ส่งใบเสร็จตัวจริงให้ฝ่ายบัญชีแล้ว", "paidDate": "08 Sep 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "24 Aug 2026", "submittedRaw": 1787542200000, "detail": "ค่ากาแฟรับรองลูกค้า", "amount": "1,180.00", "amountNum": 1180.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "31 Aug 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "16 Aug 2026", "submittedRaw": 1786851000000, "detail": "ค่าสมัครซอฟต์แวร์ออกแบบเพิ่ม 2 ที่นั่ง", "amount": "780.00", "amountNum": 780.0, "receipts": [], "docs": [], "note": "", "paidDate": "22 Aug 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "07 Aug 2026", "submittedRaw": 1786073400000, "detail": "ค่าพิมพ์เอกสารสัญญาและค่าจัดส่ง EMS ไปยังสำนักงานลูกค้า", "amount": "32,500.00", "amountNum": 32500.0, "receipts": ["https://drive.google.com/"], "docs": ["https://drive.google.com/", "https://drive.google.com/"], "note": "", "paidDate": "15 Aug 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "29 Jul 2026", "submittedRaw": 1785295800000, "detail": "ค่าที่พักไปติดตั้งระบบที่ไซต์งานต่างจังหวัด 2 คืน", "amount": "640.00", "amountNum": 640.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "ส่งใบเสร็จตัวจริงให้ฝ่ายบัญชีแล้ว", "paidDate": "06 Aug 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "22 Jul 2026", "submittedRaw": 1784691000000, "detail": "ค่าอะแดปเตอร์ USB-C hub", "amount": "1,290.00", "amountNum": 1290.0, "receipts": [], "docs": [], "note": "", "paidDate": "29 Jul 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "13 Jul 2026", "submittedRaw": 1783913400000, "detail": "ค่าแท็กซี่ไปพบลูกค้าที่อาคารสาทรสแควร์", "amount": "5,400.00", "amountNum": 5400.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "21 Jul 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "30 Jun 2026", "submittedRaw": 1782790200000, "detail": "ค่าอาหารกลางวันทีมประชุม sprint planning ประจำเดือน", "amount": "2,100.00", "amountNum": 2100.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "08 Jul 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "18 Jun 2026", "submittedRaw": 1781753400000, "detail": "ค่าอุปกรณ์สำนักงาน - เมาส์ไร้สายสำหรับใช้งานที่บ้าน", "amount": "480.00", "amountNum": 480.0, "receipts": [], "docs": [], "note": "ส่งใบเสร็จตัวจริงให้ฝ่ายบัญชีแล้ว", "paidDate": "26 Jun 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "07 Jun 2026", "submittedRaw": 1780803000000, "detail": "ค่าเดินทางไปงานสัมมนา รวมค่ารถและค่าที่จอดรถ", "amount": "9,800.00", "amountNum": 9800.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "15 Jun 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "27 May 2026", "submittedRaw": 1779852600000, "detail": "ค่าต่ออายุโดเมนเนม 1 ปี", "amount": "1,750.00", "amountNum": 1750.0, "receipts": ["https://drive.google.com/"], "docs": ["https://drive.google.com/", "https://drive.google.com/"], "note": "", "paidDate": "04 Jun 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "15 May 2026", "submittedRaw": 1778815800000, "detail": "ค่ากาแฟรับรองลูกค้า", "amount": "320.00", "amountNum": 320.0, "receipts": [], "docs": [], "note": "", "paidDate": "23 May 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "03 May 2026", "submittedRaw": 1777779000000, "detail": "ค่าสมัครซอฟต์แวร์ออกแบบเพิ่ม 2 ที่นั่ง", "amount": "12,400.00", "amountNum": 12400.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "ส่งใบเสร็จตัวจริงให้ฝ่ายบัญชีแล้ว", "paidDate": "12 May 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "20 Apr 2026", "submittedRaw": 1776655800000, "detail": "ค่าพิมพ์เอกสารสัญญาและค่าจัดส่ง EMS ไปยังสำนักงานลูกค้า", "amount": "860.00", "amountNum": 860.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "28 Apr 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "09 Apr 2026", "submittedRaw": 1775705400000, "detail": "ค่าที่พักไปติดตั้งระบบที่ไซต์งานต่างจังหวัด 2 คืน", "amount": "2,680.00", "amountNum": 2680.0, "receipts": [], "docs": [], "note": "", "paidDate": "18 Apr 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "28 Mar 2026", "submittedRaw": 1774668600000, "detail": "ค่าอะแดปเตอร์ USB-C hub", "amount": "540.00", "amountNum": 540.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "05 Apr 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "15 Mar 2026", "submittedRaw": 1773545400000, "detail": "ค่าแท็กซี่ไปพบลูกค้าที่อาคารสาทรสแควร์", "amount": "3,350.00", "amountNum": 3350.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "ส่งใบเสร็จตัวจริงให้ฝ่ายบัญชีแล้ว", "paidDate": "24 Mar 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "02 Mar 2026", "submittedRaw": 1772422200000, "detail": "ค่าอาหารกลางวันทีมประชุม sprint planning ประจำเดือน", "amount": "1,120.00", "amountNum": 1120.0, "receipts": [], "docs": ["https://drive.google.com/", "https://drive.google.com/"], "note": "", "paidDate": "11 Mar 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "17 Feb 2026", "submittedRaw": 1771299000000, "detail": "ค่าอุปกรณ์สำนักงาน - เมาส์ไร้สายสำหรับใช้งานที่บ้าน", "amount": "7,600.00", "amountNum": 7600.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "", "paidDate": "26 Feb 2026", "noClaim": false, "status": "สำเร็จ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "05 Feb 2026", "submittedRaw": 1770262200000, "detail": "ค่าเดินทางไปงานสัมมนา รวมค่ารถและค่าที่จอดรถ", "amount": "0.00", "amountNum": 0.0, "receipts": ["https://drive.google.com/"], "docs": [], "note": "ยกเลิกเพราะลูกค้าเป็นผู้ชำระแทน", "paidDate": "", "noClaim": false, "status": "ยกเลิก"}], "total": 24, "done": 19, "cancelled": 1, "pending": 4}, "personal": {"rows": [{"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "16 Oct 2026", "submittedRaw": 1792117800000, "detail": "ค่าอุปกรณ์สำนักงาน - เมาส์ไร้สายสำหรับใช้งานที่บ้าน", "amount": "450.00", "amountNum": 450.0, "receipts": [], "docs": [], "note": "", "paidDate": "", "noClaim": true, "status": "รอดำเนินการ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "21 Aug 2026", "submittedRaw": 1787279400000, "detail": "ค่าเดินทางไปงานสัมมนา รวมค่ารถและค่าที่จอดรถ", "amount": "1,980.00", "amountNum": 1980.0, "receipts": [], "docs": [], "note": "", "paidDate": "", "noClaim": true, "status": "รอดำเนินการ"}, {"name": "Bell - Athitiya Tanpaisalcharoen", "submitted": "05 Jun 2026", "submittedRaw": 1780626600000, "detail": "ค่าต่ออายุโดเมนเนม 1 ปี", "amount": "620.00", "amountNum": 620.0, "receipts": [], "docs": [], "note": "", "paidDate": "", "noClaim": true, "status": "รอดำเนินการ"}], "total": 3}}};
+(function(){function api(){var ok=function(){},o={withSuccessHandler:function(f){ok=f;return o;},
+withFailureHandler:function(){return o;},getEmployeeNames:function(){setTimeout(function(){ok(window.__FIX.names);},450);},
+getRecordsFor:function(n){setTimeout(function(){ok(n===window.__FIX.data.name?window.__FIX.data:{name:n,company:{rows:[],total:0,done:0,pending:0,cancelled:0},personal:{rows:[],total:0}});},600);},
+getRefreshData:function(){setTimeout(function(){ok({names:window.__FIX.names,data:window.__FIX.data});},600);}};return o;}
+window.google={script:{get run(){return api();}}};})();
+</script>
+<script>
+var NAMES = [], VIEW = [], act = -1;
+var DATA = null, TAB = "company", FILTER = "all", OPEN = {};
+var CURRENT = "", BUSY = false, STAMP = "", THEME = (function(){ var t = document.documentElement.getAttribute("data-theme"); if (t === "light" || t === "dark") return t; try { return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; } catch (e) { return "dark"; } })();
+var TH_MON = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+var EN_MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function el(id){ return document.getElementById(id); }
+function esc(s){ var d = document.createElement("div"); d.textContent = (s === null || s === undefined) ? "" : String(s); return d.innerHTML; }
+function attr(s){ return esc(s).split('"').join("&quot;"); }
+function icon(id, cls){ return '<svg class="ic ' + (cls || "") + '" aria-hidden="true"><use href="#' + id + '"/></svg>'; }
+function say(t){ el("live").textContent = t; }
+
+/* ---------- theme ---------- */
+try { var st = localStorage.getItem("expThemeProto"); if (st === "light" || st === "dark") THEME = st; } catch (e) {}
+applyTheme();
+function applyTheme(){
+  var light = (THEME === "light");
+  document.body.classList.toggle("light", light);
+  document.documentElement.style.backgroundColor = light ? "#ffffff" : "#010a18";
+  var b = el("themeBtn");
+  b.setAttribute("aria-pressed", light ? "true" : "false");
+  var t = light ? "สลับเป็นโหมดมืด" : "สลับเป็นโหมดสว่าง";
+  b.setAttribute("title", t);
+  el("tlabel").textContent = t;
+  el("tico").innerHTML = '<use href="#' + (light ? "i-sun" : "i-moon") + '"/>';
+}
+el("themeBtn").onclick = function(){
+  THEME = (THEME === "light") ? "dark" : "light";
+  try { localStorage.setItem("expThemeProto", THEME); } catch (e) {}
+  applyTheme();
+};
+
+/* ---------- helpers ---------- */
+function money(n){
+  var neg = n < 0, p = Math.abs(n).toFixed(2).split("."), h = p[0], g = "";
+  while (h.length > 3){ g = "," + h.substring(h.length - 3) + g; h = h.substring(0, h.length - 3); }
+  return (neg ? "-" : "") + h + g + "." + p[1];
+}
+function monthOf(r){
+  if (r.submittedRaw){
+    var d = new Date(r.submittedRaw);
+    return { k: d.getFullYear() + "-" + d.getMonth(), t: TH_MON[d.getMonth()] + " " + d.getFullYear() };
+  }
+  var p = String(r.submitted || "").split(" ");
+  if (p.length === 3){
+    var m = EN_MON.indexOf(p[1]);
+    if (m >= 0) return { k: p[2] + "-" + m, t: TH_MON[m] + " " + p[2] };
+  }
+  return { k: "unknown", t: "ไม่ระบุวันที่" };
+}
+function daysWaiting(r){
+  if (!r.submittedRaw) return null;
+  var d = Math.floor((Date.now() - r.submittedRaw) / 86400000);
+  return d > 0 ? d : 0;
+}
+function pillClass(s){ return s === "สำเร็จ" ? "pill ok" : (s === "ยกเลิก" ? "pill cx" : "pill wt"); }
+function statusKey(s){ return s === "สำเร็จ" ? "ok" : (s === "ยกเลิก" ? "cx" : "wt"); }
+
+/* ---------- screen state ---------- */
+function showResult(on){
+  el("back").className = on ? "ghost" : "ghost hide";
+  el("searchcard").className = on ? "card searchcard hide" : "card searchcard";
+  el("result").className = on ? "" : "hide";
+  el("wrap").className = on ? "wrap" : "wrap center";
+}
+
+/* ---------- load names ---------- */
+loadNames();
+function loadNames(){
+  el("err").innerHTML = "";
+  el("msg").textContent = "กำลังโหลดรายชื่อพนักงาน...";
+  el("loadbar").className = "loadbar";
+  el("q").disabled = true;
+  el("q").placeholder = "กำลังโหลดรายชื่อ...";
+  google.script.run.withSuccessHandler(onNames).withFailureHandler(function(e){ failNames(e); }).getEmployeeNames();
+}
+function onNames(list){
+  NAMES = list || [];
+  el("msg").textContent = "";
+  el("loadbar").className = "loadbar hide";
+  el("q").disabled = false;
+  el("q").placeholder = "พิมพ์ชื่อเพื่อค้นหา...";
+}
+function failNames(e){
+  el("msg").textContent = "";
+  el("loadbar").className = "loadbar hide";
+  el("q").placeholder = "โหลดรายชื่อไม่สำเร็จ";
+  showError("โหลดรายชื่อพนักงานไม่สำเร็จ อาจเป็นเพราะการเชื่อมต่อหลุดชั่วคราว", loadNames, e);
+}
+function showError(text, retry, e){
+  if (e && window.console) console.error(e);
+  var h = '<div class="errbox"><p>' + esc(text) + '</p>';
+  if (retry) h += '<button type="button" id="retry">ลองใหม่อีกครั้ง</button>';
+  h += '</div>';
+  el("err").innerHTML = h;
+  if (retry) el("retry").onclick = function(){ el("err").innerHTML = ""; retry(); };
+}
+
+/* ---------- search ---------- */
+function matches(q){
+  q = String(q || "").trim().toLowerCase();
+  if (!q) return NAMES.slice(0, 60);
+  var a = [], b = [];
+  for (var i = 0; i < NAMES.length; i++){
+    var n = NAMES[i], p = n.toLowerCase().indexOf(q);
+    if (p === 0) a.push(n); else if (p > 0) b.push(n);
+  }
+  return a.concat(b).slice(0, 60);
+}
+function showSuggest(){
+  var typed = el("q").value.trim();
+  VIEW = matches(typed);
+  var ul = el("sg"), q = el("q");
+  if (!VIEW.length){
+    ul.className = "suggest hide"; ul.innerHTML = "";
+    q.setAttribute("aria-expanded", "false");
+    q.removeAttribute("aria-activedescendant");
+    if (typed){
+      el("nohit").className = "nohit";
+      el("nohit").innerHTML = "ไม่พบชื่อ &ldquo;" + esc(typed) + "&rdquo; ในระบบ ลองตรวจตัวสะกดอีกครั้ง หรือติดต่อฝ่ายบัญชีหากคุณเพิ่งส่งฟอร์มครั้งแรก";
+      say("ไม่พบรายชื่อที่ตรงกับที่พิมพ์");
+    } else {
+      el("nohit").className = "nohit hide";
+    }
+    return;
+  }
+  el("nohit").className = "nohit hide";
+  var h = "";
+  for (var i = 0; i < VIEW.length; i++){
+    h += '<li role="option" id="opt' + i + '" data-i="' + i + '" aria-selected="' + (i === act ? "true" : "false") + '">' + esc(VIEW[i]) + '</li>';
+  }
+  ul.innerHTML = h;
+  ul.className = "suggest";
+  q.setAttribute("aria-expanded", "true");
+  if (act >= 0) q.setAttribute("aria-activedescendant", "opt" + act); else q.removeAttribute("aria-activedescendant");
+  var lis = ul.getElementsByTagName("li");
+  for (var j = 0; j < lis.length; j++){
+    lis[j].onmousedown = function(ev){ ev.preventDefault(); pick(VIEW[Number(this.getAttribute("data-i"))]); };
+  }
+  say(VIEW.length + " รายชื่อที่ตรงกัน");
+}
+function hideSuggest(){
+  el("sg").className = "suggest hide";
+  el("q").setAttribute("aria-expanded", "false");
+  el("q").removeAttribute("aria-activedescendant");
+  act = -1;
+}
+
+function pick(name){
+  if (!name) return;
+  el("q").value = name;
+  hideSuggest();
+  el("nohit").className = "nohit hide";
+  el("err").innerHTML = "";
+  DATA = null; CURRENT = name; STAMP = ""; TAB = "company"; FILTER = "all"; OPEN = {};
+  el("who").textContent = name;
+  el("answer").innerHTML = "";
+  showResult(true);
+  el("ledger").innerHTML = skeleton();
+  window.scrollTo(0, 0);
+  say("กำลังโหลดรายการของ " + name);
+  google.script.run.withSuccessHandler(onRecords).withFailureHandler(function(e){
+    el("ledger").innerHTML = "";
+    showError("โหลดรายการของ " + name + " ไม่สำเร็จ", function(){ pick(name); }, e);
+  }).getRecordsFor(name);
+}
+function onRecords(res){ DATA = res; stampNow(); paint(); }
+
+function goBack(){
+  DATA = null; CURRENT = ""; STAMP = ""; OPEN = {};
+  el("q").value = "";
+  el("who").textContent = "";
+  el("answer").innerHTML = "";
+  el("ledger").innerHTML = "";
+  el("err").innerHTML = "";
+  hideSuggest();
+  showResult(false);
+  el("q").focus();
+}
+el("back").onclick = goBack;
+
+function skeleton(){
+  var h = "";
+  for (var i = 0; i < 5; i++){
+    h += '<div class="skrow"><div class="sk"></div><div class="sk" style="width:' + (54 + (i * 9) % 34) + '%"></div><div class="sk"></div></div>';
+  }
+  return h;
+}
+
+/* ---------- render ---------- */
+function paint(){
+  if (!DATA) return;
+  var comp = DATA.company || { rows: [], total: 0, done: 0, pending: 0, cancelled: 0 };
+  var pers = DATA.personal || { rows: [], total: 0 };
+  el("who").textContent = DATA.name;
+  tagIds(comp.rows, "c"); tagIds(pers.rows, "p");
+  paintAnswer(comp);
+  paintLedger(comp, pers);
+}
+
+function tagIds(rows, prefix){
+  if (!rows) return;
+  for (var i = 0; i < rows.length; i++) rows[i].__id = prefix + i;
+}
+
+function paintAnswer(comp){
+  var rows = comp.rows || [];
+  var pending = [], owed = 0, oldest = null;
+  for (var i = 0; i < rows.length; i++){
+    if (rows[i].status !== "รอดำเนินการ") continue;
+    pending.push(rows[i]);
+    if (typeof rows[i].amountNum === "number") owed += rows[i].amountNum;
+    var d = daysWaiting(rows[i]);
+    if (d !== null && (oldest === null || d > oldest)) oldest = d;
+  }
+
+  var h = "";
+  if (!rows.length){
+    h = '<p class="answer done">ยังไม่มีรายการเบิกบริษัท</p>' +
+        '<p class="ameta">เมื่อคุณส่งฟอร์มเบิกค่าใช้จ่าย รายการจะขึ้นที่นี่</p>';
+  } else if (!pending.length){
+    h = '<p class="answer done">ได้รับคืนครบแล้ว</p>' +
+        '<p class="ameta">ทุกรายการที่เบิกบริษัทได้รับเงินคืนเรียบร้อยแล้ว</p>';
+  } else {
+    if (owed > 0){
+      h = '<p class="answer">บริษัทค้างคุณอยู่ <b>' + money(owed) + '</b> บาท</p>';
+    } else {
+      h = '<p class="answer">มี <b>' + pending.length + '</b> รายการที่ยังรอดำเนินการ</p>';
+    }
+    var m = 'จาก <button type="button" class="jump" id="jumpwt">' + pending.length + ' รายการที่รอดำเนินการ</button>';
+    if (oldest !== null) m += '<span class="sep">·</span>รายการเก่าสุดรอมา ' + oldest + ' วัน';
+    h += '<p class="ameta">' + m + '</p>';
+  }
+  el("answer").innerHTML = h;
+  var j = el("jumpwt");
+  if (j) j.onclick = function(){ TAB = "company"; FILTER = "wt"; paint(); say("แสดงเฉพาะรายการที่รอดำเนินการ"); };
+}
+
+function paintLedger(comp, pers){
+  var isC = (TAB === "company");
+  var all = (isC ? comp.rows : pers.rows) || [];
+  var counts = { all: all.length, wt: 0, ok: 0, cx: 0 };
+  for (var i = 0; i < all.length; i++) counts[statusKey(all[i].status)]++;
+
+  var rows = (isC && FILTER !== "all")
+    ? all.filter(function(r){ return statusKey(r.status) === FILTER; })
+    : all;
+
+  var h = '<div class="lhead1"><div class="seg" role="tablist">';
+  h += '<button type="button" role="tab" class="segbtn" aria-selected="' + (isC ? "true" : "false") + '" data-t="company">เบิกบริษัท <span class="cnt">' + comp.total + '</span></button>';
+  h += '<button type="button" role="tab" class="segbtn" aria-selected="' + (isC ? "false" : "true") + '" data-t="personal">ไม่เบิกบริษัท <span class="cnt">' + pers.total + '</span></button>';
+  h += '</div><div class="refreshbox"><button type="button" class="refresh" id="refresh">' + icon("i-refresh") + 'รีเฟรช</button><span class="stamp" id="stamp">' + esc(STAMP) + '</span></div></div>';
+
+  if (isC && all.length){
+    h += '<div class="lhead2">' + chip("all", "ทั้งหมด", counts.all) + chip("wt", "รอดำเนินการ", counts.wt) + chip("ok", "คืนแล้ว", counts.ok);
+    if (counts.cx) h += chip("cx", "ยกเลิก", counts.cx);
+    h += '</div>';
+  }
+  if (!isC && all.length){
+    h += '<p class="note">รายการเหล่านี้ถูกฝ่ายบัญชีทำเครื่องหมายไว้ว่าไม่เบิกจากบริษัท หากคิดว่าไม่ถูกต้อง กรุณาติดต่อฝ่ายบัญชี</p>';
+  }
+
+  if (!rows.length){
+    h += emptyState(isC, all.length, counts);
+  } else {
+    h += '<div class="colhead' + (isC ? "" : " p3") + '" aria-hidden="true"><span>วันที่กรอกเข้ามา</span><span>รายละเอียดค่าใช้จ่าย</span><span class="r">ยอดเงิน</span>' +
+         (isC ? '<span class="c">วันที่บริษัทชำระคืน</span><span class="c">สถานะการเบิก</span>' : '') + '<span></span></div>';
+    h += '<ul class="ledger">';
+    var lastKey = "";
+    for (var k = 0; k < rows.length; k++){
+      var m = monthOf(rows[k]);
+      if (m.k !== lastKey){ h += '<li class="grp">' + esc(m.t) + '</li>'; lastKey = m.k; }
+      h += entry(rows[k], isC);
+    }
+    h += '</ul>';
+  }
+
+  el("ledger").innerHTML = h;
+  bindLedger();
+}
+
+function chip(key, label, n){
+  return '<button type="button" class="chip" data-f="' + key + '" aria-pressed="' + (FILTER === key ? "true" : "false") + '">' + label + ' <b>' + n + '</b></button>';
+}
+
+function emptyState(isC, totalInTab, counts){
+  if (isC && totalInTab && FILTER !== "all"){
+    var names = { wt: "รอดำเนินการ", ok: "คืนแล้ว", cx: "ยกเลิก" };
+    return '<div class="empty"><strong>ไม่มีรายการที่ ' + names[FILTER] + '</strong>' +
+           'ลองดูรายการทั้งหมดของคุณแทน<br><button type="button" id="clearf">ดูทั้งหมด ' + counts.all + ' รายการ</button></div>';
+  }
+  if (isC){
+    return '<div class="empty"><strong>ยังไม่มีรายการเบิกบริษัท</strong>รายการที่คุณส่งผ่านฟอร์มเบิกค่าใช้จ่ายจะปรากฏที่นี่</div>';
+  }
+  return '<div class="empty"><strong>ไม่มีรายการที่ไม่เบิกบริษัท</strong>รายการทั้งหมดของคุณเป็นรายการที่เบิกจากบริษัทได้</div>';
+}
+
+function entry(r, isC){
+  var id = String(r.__id);
+  var open = !!OPEN[id];
+  var wait = (isC && r.status === "รอดำเนินการ") ? daysWaiting(r) : null;
+  var dash = '<span class="dash">-</span>';
+
+  var h = '<li class="ent' + (open ? " open" : "") + '">';
+  h += '<button type="button" class="esum' + (isC ? "" : " p3") + '" id="b' + id + '" aria-expanded="' + (open ? "true" : "false") + '" aria-controls="d' + id + '" data-id="' + id + '">';
+  h += '<span class="e-date"><span class="sr">วันที่กรอกเข้ามา </span>' + esc(r.submitted || "-") +
+       (wait !== null ? '<span class="wafter"> · รอมา ' + wait + ' วัน</span>' : '') + '</span>';
+  h += '<span class="e-det"><span class="sr">รายละเอียด </span>' + (r.detail ? esc(r.detail) : dash) + '</span>';
+  h += '<span class="e-amt"><span class="sr">ยอดเงิน </span>' + (r.amount ? esc(r.amount) : dash) + '</span>';
+  if (isC){
+    h += '<span class="e-paid"><span class="sr">วันที่บริษัทชำระคืน </span>' + (r.paidDate ? esc(r.paidDate) : dash) + '</span>';
+    h += '<span class="e-st"><span class="sr">สถานะ </span><span class="' + pillClass(r.status) + '">' + esc(r.status) + '</span>' +
+         (wait !== null ? '<span class="wait">รอมา ' + wait + ' วัน</span>' : '') + '</span>';
+  }
+  h += icon("i-chev", "chev");
+  h += '</button>';
+
+  h += '<div class="det" id="d' + id + '" role="region" aria-labelledby="b' + id + '"><div class="detin"><div class="detpad">';
+  h += drow("รายละเอียดค่าใช้จ่าย", r.detail ? esc(r.detail) : dash, "");
+  if (isC) h += drow("วันที่บริษัทชำระคืน", r.paidDate ? esc(r.paidDate) : dash, "narrow");
+  h += drow("หมายเหตุ", r.note ? esc(r.note) : dash, "");
+  var files = links(r.receipts, "ใบกำกับภาษี") + links(r.docs, "เอกสารเพิ่มเติม");
+  h += drow("ไฟล์แนบ", files || dash, "");
+  h += '</div></div></div></li>';
+  return h;
+}
+function drow(k, v, cls){ return '<div class="drow' + (cls ? " " + cls : "") + '"><div class="dkey">' + k + '</div><div class="dval">' + v + '</div></div>'; }
+function links(list, label){
+  if (!list || !list.length) return "";
+  var out = "";
+  for (var i = 0; i < list.length; i++){
+    out += '<a class="filelink" target="_blank" rel="noopener" href="' + attr(list[i]) + '">' + icon("i-doc") + label + (list.length > 1 ? " " + (i + 1) : "") + '</a>';
+  }
+  return out;
+}
+
+/* ---------- bindings ---------- */
+function bindLedger(){
+  var box = el("ledger");
+  var tabs = box.getElementsByClassName("segbtn");
+  for (var i = 0; i < tabs.length; i++){
+    tabs[i].onclick = function(){
+      var t = this.getAttribute("data-t");
+      if (t === TAB) return;
+      TAB = t; FILTER = "all"; OPEN = {}; paint();
+    };
+  }
+  var chips = box.getElementsByClassName("chip");
+  for (var c = 0; c < chips.length; c++){
+    chips[c].onclick = function(){
+      FILTER = this.getAttribute("data-f"); paint();
+    };
+  }
+  var cf = el("clearf");
+  if (cf) cf.onclick = function(){ FILTER = "all"; paint(); };
+
+  var sums = box.getElementsByClassName("esum");
+  for (var s = 0; s < sums.length; s++){
+    sums[s].onclick = function(){
+      var id = this.getAttribute("data-id");
+      var li = this.parentNode;
+      var now = !OPEN[id];
+      if (now) OPEN[id] = true; else delete OPEN[id];
+      li.className = now ? "ent open" : "ent";
+      this.setAttribute("aria-expanded", now ? "true" : "false");
+    };
+  }
+  var rb = el("refresh");
+  if (rb){ rb.onclick = doRefresh; if (BUSY) setBusy(true); }
+}
+
+/* ---------- refresh ---------- */
+function setBusy(on){
+  var b = el("refresh");
+  if (!b) return;
+  b.disabled = on;
+  b.className = on ? "refresh busy" : "refresh";
+  b.setAttribute("aria-busy", on ? "true" : "false");
+}
+function stampNow(){
+  var d = new Date(), p = function(n){ return (n < 10 ? "0" : "") + n; };
+  STAMP = "อัปเดตล่าสุด " + p(d.getHours()) + ":" + p(d.getMinutes());
+  var s = el("stamp");
+  if (s) s.textContent = STAMP;
+}
+function doRefresh(){
+  if (BUSY || !CURRENT) return;
+  BUSY = true; setBusy(true);
+  el("err").innerHTML = "";
+  google.script.run.withSuccessHandler(function(res){
+    BUSY = false; setBusy(false);
+    if (res){
+      NAMES = res.names || NAMES;
+      if (res.data && res.data.name){ DATA = res.data; stampNow(); paint(); say("อัปเดตข้อมูลแล้ว"); }
+    }
+  }).withFailureHandler(function(e){
+    BUSY = false; setBusy(false);
+    showError("รีเฟรชข้อมูลไม่สำเร็จ ข้อมูลที่แสดงอยู่เป็นข้อมูลล่าสุดที่โหลดได้", doRefresh, e);
+  }).getRefreshData(CURRENT);
+}
+
+/* ---------- search events ---------- */
+var q = el("q");
+q.addEventListener("input", function(){ act = -1; showSuggest(); });
+q.addEventListener("focus", function(){ showSuggest(); });
+q.addEventListener("blur", function(){ setTimeout(hideSuggest, 140); });
+q.addEventListener("keydown", function(ev){
+  if (ev.key === "ArrowDown"){ ev.preventDefault(); if (VIEW.length){ act = (act + 1) % VIEW.length; showSuggest(); } }
+  else if (ev.key === "ArrowUp"){ ev.preventDefault(); if (VIEW.length){ act = (act <= 0 ? VIEW.length - 1 : act - 1); showSuggest(); } }
+  else if (ev.key === "Enter"){ ev.preventDefault(); pick(act >= 0 ? VIEW[act] : (VIEW.length === 1 ? VIEW[0] : null)); }
+  else if (ev.key === "Escape"){ hideSuggest(); }
+});
+</script>
+</body>
+</html>
